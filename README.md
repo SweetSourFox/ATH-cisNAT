@@ -96,7 +96,7 @@ The pipeline combines Python and R scripts with parallel processing capabilities
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/AThNATCount.git
+git clone https://github.com/SweetSourFox/ATH-cisNAT.git
 cd AThNATCount
 ```
 
@@ -534,37 +534,14 @@ performance:
   memory_limit: "16GB"
 ```
 
-## Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-### Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/AThNATCount.git
-
-# Install development dependencies
-pip install -r requirements.txt
-```
-
-## Citation
-
-If you use AThNATCount in your research, please cite:
-
-```
-AThNATCount: A Pipeline for Arabidopsis thaliana Natural Antisense Transcript Analysis
-[Your Name et al.]
-[Journal/Conference]
-[Year]
-```
-
 ## License
 
 This project is licensed under the GNU GENERAL PUBLIC LICENSE Version 3 License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
+- The Mott Lab
+- UofT, Scarborough
 - Arabidopsis Information Resource (TAIR)
 - 10X Genomics for single-cell tools
 - R/Bioconductor community
