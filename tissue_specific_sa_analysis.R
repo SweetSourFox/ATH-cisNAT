@@ -355,6 +355,39 @@ create_comprehensive_visualizations <- function(data, stats, output_dir, config,
   log_func("Creating comprehensive visualizations...")
   
   tryCatch({
+    # Validate input data
+    if (nrow(data) == 0) {
+      log_func("No data available for visualizations", "WARNING")
+      return()
+    }
+    
+    if (n_distinct(data$tissue_clean) < 1) {
+      log_func("No tissue types found in data", "WARNING")
+      return()
+    }
+    
+    # Check if correlation column exists and has valid data
+    if (!"correlation" %in% colnames(data)) {
+      log_func("Correlation column not found in data", "WARNING")
+      return()
+    }
+    
+    if (all(is.na(data$correlation))) {
+      log_func("All correlation values are NA", "WARNING")
+      return()
+    }
+    
+    # Validate stats object
+    if (is.null(stats) || !is.list(stats)) {
+      log_func("Invalid stats object provided", "WARNING")
+      return()
+    }
+    
+    if (!all(c("tissue_summary", "gene_summary") %in% names(stats))) {
+      log_func("Stats object missing required components", "WARNING")
+      return()
+    }
+    
     # Create subdirectories
     dirs <- c("distributions", "comparisons", "heatmaps", "networks")
     for (d in dirs) {
@@ -426,24 +459,31 @@ create_comprehensive_visualizations <- function(data, stats, output_dir, config,
   
   # 3. Comprehensive heatmap
   if (nrow(stats$gene_summary) > 20) {
-    # Select top variable genes
-    variable_genes <- stats$gene_summary %>%
-      group_by(Gene) %>%
-      summarise(variability = sd(mean_correlation, na.rm = TRUE)) %>%
-      arrange(desc(variability)) %>%
-      head(50) %>%
-      pull(Gene)
-    
-    heatmap_data <- stats$gene_summary %>%
-      filter(Gene %in% variable_genes) %>%
-      select(Gene, tissue_clean, mean_correlation) %>%
-      pivot_wider(names_from = tissue_clean, values_from = mean_correlation, values_fill = 0)
-    
-    # Check if we have enough data for heatmap
-    if (nrow(heatmap_data) > 1 && ncol(heatmap_data) > 2) {
-      # Create matrix
-      heatmap_matrix <- as.matrix(heatmap_data[, -1])
-      rownames(heatmap_matrix) <- heatmap_data$Gene
+    tryCatch({
+      # Select top variable genes
+      variable_genes <- stats$gene_summary %>%
+        group_by(Gene) %>%
+        summarise(variability = sd(mean_correlation, na.rm = TRUE)) %>%
+        arrange(desc(variability)) %>%
+        head(50) %>%
+        pull(Gene)
+      
+      heatmap_data <- stats$gene_summary %>%
+        filter(Gene %in% variable_genes) %>%
+        select(Gene, tissue_clean, mean_correlation) %>%
+        pivot_wider(names_from = tissue_clean, values_from = mean_correlation, values_fill = 0)
+      
+      # Check if we have enough data for heatmap
+      if (nrow(heatmap_data) > 1 && ncol(heatmap_data) > 2) {
+        # Create matrix
+        heatmap_matrix <- as.matrix(heatmap_data[, -1])
+        rownames(heatmap_matrix) <- heatmap_data$Gene
+        
+        # Additional validation for matrix dimensions
+        if (nrow(heatmap_matrix) < 2 || ncol(heatmap_matrix) < 2) {
+          log_func("Skipping heatmap creation - matrix dimensions too small", "WARNING")
+          return()
+        }
     
     # Create annotations
     col_fun <- colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
@@ -503,6 +543,9 @@ create_comprehensive_visualizations <- function(data, stats, output_dir, config,
     } else {
       log_func("Skipping heatmap creation - insufficient data", "WARNING")
     }
+    }, error = function(e) {
+      log_func(sprintf("Error creating heatmap: %s", e$message), "WARNING")
+    })
   }
   
   # 4. Scatter plot matrix for tissue comparisons
@@ -517,6 +560,13 @@ create_comprehensive_visualizations <- function(data, stats, output_dir, config,
       
       # Check if we have enough data
       if (ncol(scatter_data) > 2 && nrow(scatter_data) > 10) {
+        # Additional validation for matrix dimensions
+        scatter_matrix <- as.matrix(scatter_data[, -1])
+        if (nrow(scatter_matrix) < 2 || ncol(scatter_matrix) < 2) {
+          log_func("Skipping scatter matrix - matrix dimensions too small", "WARNING")
+          return()
+        }
+        
         # Create scatter plot matrix
         p4 <- GGally::ggpairs(
           scatter_data[, -1],
