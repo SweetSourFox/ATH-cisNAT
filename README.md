@@ -4,7 +4,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![R 4.3+](https://img.shields.io/badge/R-4.3+-green.svg)](https://www.r-project.org/)
 
-A comprehensive computational pipeline for analyzing sense-antisense transcript correlations in *Arabidopsis thaliana* single-cell RNA-seq data, with special focus on Leucine-Rich Repeat Receptor-Like Kinases (LRR-RLKs) and tissue-specific regulation patterns.
+A computational pipeline for analyzing sense-antisense transcript correlations in *Arabidopsis thaliana* single-cell RNA-seq data, with focus on Leucine-Rich Repeat Receptor-Like Kinases (LRR-RLKs) and tissue-specific regulation patterns.
 
 ## Table of Contents
 
@@ -24,43 +24,42 @@ A comprehensive computational pipeline for analyzing sense-antisense transcript 
 
 ## Overview
 
-AThNATCount is an advanced bioinformatics pipeline designed to:
+AThNATCount is a bioinformatics pipeline designed to:
 
-1. **Integrate cis-Natural Antisense Transcripts (cis-NATs)** into reference genome annotations
-2. **Analyze sense-antisense correlations** from 10X Genomics single-cell RNA-seq data
-3. **Perform tissue-specific analysis** across multiple sample types and conditions
+1. **Process 10X Genomics single-cell RNA-seq data** from Arabidopsis thaliana samples
+2. **Analyze sense-antisense correlations** between gene pairs
+3. **Perform tissue-specific analysis** across multiple sample types
 4. **Focus on LRR-RLK gene families** for plant immunity and development studies
-5. **Process multiple data sources** including NCBI/SRA and China National GeneBank (CNGB)
-6. **Generate publication-ready visualizations** and comprehensive reports
+5. **Fetch and integrate metadata** from NCBI/SRA and China National GeneBank (CNGB)
+6. **Generate visualizations** and statistical reports
 
-The pipeline combines Python and R scripts with parallel processing capabilities, automated quality control, and advanced statistical modeling.
+The pipeline combines Python and R scripts with parallel processing capabilities and automated quality control.
 
 ## Features
 
 ### Core Capabilities
 
-- **Automated GTF Enhancement**: Adds artificial antisense annotations for genes lacking natural antisense partners
-- **Parallel Processing**: Utilizes multiple CPU cores for faster computation with configurable chunking
-- **Memory Efficient**: Handles large single-cell datasets with streaming and chunking
-- **Comprehensive Statistics**: Pearson, Spearman, and Kendall correlation methods with multiple testing correction
-- **Advanced Quality Control**: Automated validation and error handling
+- **10X Data Processing**: Reads and processes CellRanger output files
+- **Correlation Analysis**: Computes Pearson, Spearman, and Kendall correlations between sense-antisense pairs
+- **Parallel Processing**: Utilizes multiple CPU cores for faster computation
+- **Batch Analysis**: Process multiple samples automatically
+- **Metadata Integration**: Automated fetching from NCBI/SRA and CNGB databases
+- **Quality Control**: Filtering based on minimum shared cells and expression thresholds
 
-### Advanced Features
+### Analysis Features
 
-- **Machine Learning Integration**: Pattern recognition for LRR-RLK identification with confidence scoring
-- **Network Analysis**: Interaction networks for sense-antisense pairs with centrality metrics
-- **Interactive Visualizations**: Publication-ready figures with customizable themes and color palettes
-- **Batch Processing**: Handle multiple samples automatically with cross-sample comparisons
-- **Configuration Management**: YAML-based configuration for reproducibility and customization
-- **Metadata Integration**: Automated fetching and processing of sample metadata from multiple databases
-- **Tissue-Specific Analysis**: Advanced statistical modeling for tissue-specific regulation patterns
+- **Tissue-Specific Analysis**: Statistical analysis across different tissue types
+- **LRR-RLK Analysis**: Specialized analysis for receptor-like kinase gene families
+- **GTF Processing**: Enhances reference annotations with cis-NAT information
+- **Statistical Testing**: Multiple testing correction and significance analysis
+- **Data Export**: CSV, Excel, and JSON output formats
 
 ### Data Source Support
 
 - **10X Genomics**: Single-cell RNA-seq data processing
-- **NCBI/SRA**: Automated metadata fetching with rate limiting and retry logic
+- **NCBI/SRA**: Automated metadata fetching with rate limiting
 - **CNGB/CRR**: China National GeneBank sample processing
-- **Multiple Formats**: Support for CSV, Excel, JSON, and HDF5 outputs
+- **Multiple Formats**: Support for H5, CSV, and other data formats
 
 ## Requirements
 
@@ -69,7 +68,7 @@ The pipeline combines Python and R scripts with parallel processing capabilities
 - **Operating System**: Linux/macOS (Windows via WSL2)
 - **Memory**: Minimum 8GB RAM (16GB+ recommended for large datasets)
 - **Storage**: 10GB+ free space for analysis and results
-- **CPU**: Multi-core processor recommended (8+ cores for optimal performance)
+- **CPU**: Multi-core processor recommended (4+ cores for optimal performance)
 
 ### Software Dependencies
 
@@ -83,15 +82,14 @@ The pipeline combines Python and R scripts with parallel processing capabilities
 - **Matrix**: Sparse matrix operations
 - **dplyr/ggplot2**: Data manipulation and visualization
 - **rtracklayer/GenomicRanges**: Genomic data processing
-- **ComplexHeatmap**: Advanced heatmap visualizations
-- **igraph**: Network analysis
+- **corrplot**: Correlation visualization
+- **viridis**: Color palettes
 
 ### Key Python Packages
 
 - **pandas**: Data manipulation
 - **requests**: API interactions
 - **yaml**: Configuration management
-- **concurrent.futures**: Parallel processing
 
 ## Installation
 
@@ -116,14 +114,14 @@ conda activate athnatcount
 
 ```bash
 # Install all required R packages
-Rscript R/install_packages.R
+Rscript install_packages.R
 ```
 
 ### 4. Verify Installation
 
 ```bash
 # Test the installation
-Rscript test_batch_analysis.R
+Rscript batch_simple.R
 ```
 
 ## Quick Start
@@ -138,7 +136,7 @@ project:
   output_dir: "./results"
 
 reference:
-  gtf_file: "./ATH_APNAT/genes/genes.gtf.gz"
+  gtf_file: "./Ref/Araport11_genes.gtf"
   lncrna_gff: "./Ref/A.tha.lncRNA.gff"
   
 input:
@@ -170,7 +168,7 @@ analysis:
     pvalue_threshold: 0.05
 ```
 
-### 2. Run the Complete Pipeline
+### 2. Run the Pipeline
 
 ```bash
 # Step 1: Fetch missing metadata (if needed)
@@ -203,7 +201,7 @@ Rscript lrr_rlk_analysis.R
 ### Python Scripts
 
 #### `fetch_missing_metadata.py`
-Enhanced metadata fetcher for NCBI/SRA databases with parallel processing and comprehensive error handling.
+Fetches missing metadata from NCBI/SRA databases with parallel processing and error handling.
 
 ```bash
 python fetch_missing_metadata.py --samples SRR123456 SRR789012 --output results/
@@ -211,13 +209,12 @@ python fetch_missing_metadata.py --samples SRR123456 SRR789012 --output results/
 
 **Features:**
 - Parallel NCBI queries with rate limiting
-- Automatic retry on failure with exponential backoff
-- Comprehensive metadata extraction (experiment, sample, study, run info)
+- Automatic retry on failure
+- Comprehensive metadata extraction
 - Multiple output formats (CSV, Excel, JSON)
-- Configurable email and API key support
 
 #### `search_crr_samples.py`
-Processor for China National GeneBank (CNGB) CRR samples with metadata integration.
+Processes China National GeneBank (CNGB) CRR samples with metadata integration.
 
 ```bash
 python search_crr_samples.py --samples CRR151722 CRR151723 --input metadata.csv
@@ -227,22 +224,20 @@ python search_crr_samples.py --samples CRR151722 CRR151723 --input metadata.csv
 - CRR sample ID parsing and classification
 - Integration with existing metadata
 - SA_Results availability checking
-- Comprehensive metadata analysis
 
 ### R Scripts
 
 #### `gtf_add_cisnat.R`
-Integrates cis-NAT information into reference GTF files with advanced features.
+Integrates cis-NAT information into reference GTF files.
 
 **Key features:**
 - Automatic lncRNA integration from GFF files
 - Artificial antisense generation for genes without partners
 - Quality validation and CellRanger compatibility check
 - Parallel processing for large datasets
-- Comprehensive summary statistics
 
 #### `gtf_transcript_exon_fix.R`
-Ensures GTF compliance with single-cell analysis tools through comprehensive validation.
+Ensures GTF compliance with single-cell analysis tools.
 
 ```bash
 Rscript gtf_transcript_exon_fix.R input.gtf output.gtf
@@ -253,10 +248,9 @@ Rscript gtf_transcript_exon_fix.R input.gtf output.gtf
 - Gene ID propagation
 - Synthetic exon generation for transcripts without exons
 - Memory-efficient processing for large files
-- Automatic backup creation
 
 #### `sense_nat_correlation.R`
-Core analysis script for sense-antisense correlations with advanced statistical capabilities.
+Core analysis script for sense-antisense correlations.
 
 ```bash
 Rscript sense_nat_correlation.R \
@@ -271,10 +265,9 @@ Rscript sense_nat_correlation.R \
 - Parallel processing with configurable chunking
 - Advanced filtering and quality control
 - Comprehensive visualization suite
-- Expression data export capabilities
 
 #### `batch_simple.R`
-Simple test script for batch analysis functionality with automated file discovery.
+Test script for batch analysis functionality.
 
 ```bash
 Rscript batch_simple.R
@@ -287,7 +280,7 @@ Rscript batch_simple.R
 - Progress reporting and error handling
 
 #### `tissue_specific_sa_analysis.R`
-Comprehensive tissue-specific analysis with advanced statistical modeling and visualization.
+Tissue-specific analysis with statistical modeling and visualization.
 
 ```bash
 Rscript tissue_specific_sa_analysis.R config.yaml results/
@@ -295,23 +288,21 @@ Rscript tissue_specific_sa_analysis.R config.yaml results/
 
 **Features:**
 - Automated data integration from multiple sources
-- Advanced statistical modeling (mixed effects, Bayesian)
-- Machine learning for pattern discovery
-- Interactive dashboards and reports
-- Publication-ready visualizations
+- Statistical modeling for tissue-specific patterns
+- Interactive visualizations
+- Publication-ready figures
 
 #### `lrr_rlk_analysis.R`
-Specialized analysis for LRR-RLK gene families with network analysis and pattern recognition.
+Specialized analysis for LRR-RLK gene families.
 
 ```bash
 Rscript lrr_rlk_analysis.R
 ```
 
 **Features:**
-- Advanced LRR-RLK identification using multiple databases
-- Machine learning-based pattern recognition
+- LRR-RLK identification using pattern matching
 - Network analysis and visualization
-- Interactive reporting with Shiny integration
+- Statistical comparisons
 - Publication-ready figures and tables
 
 ## Configuration
@@ -331,10 +322,10 @@ project:
 ### Reference Files
 ```yaml
 reference:
-  gtf_file: "./ATH_APNAT/genes/genes.gtf.gz"
+  gtf_file: "./Ref/Araport11_genes.gtf"
   lncrna_gff: "./Ref/A.tha.lncRNA.gff"
   lrr_rlk_ids: "./Ref/AtLRR_RLK_ids.txt"
-  genome_fasta: "./ATH_APNAT/fasta/genome.fa"
+  genome_fasta: "./Ref/Araport11_genome.fasta"
 ```
 
 ### Analysis Parameters
@@ -368,7 +359,7 @@ analysis:
 performance:
   parallel_cores: 0  # 0 = auto-detect
   chunk_size: 1000
-  memory_limit: "80GB"
+  memory_limit: "16GB"
 ```
 
 ### NCBI/SRA Settings
@@ -410,12 +401,6 @@ Rscript sense_nat_correlation.R \
 ```bash
 # Run comprehensive tissue analysis
 Rscript tissue_specific_sa_analysis.R config.yaml tissue_results/
-
-# This will:
-# - Load all correlation data from batch analysis
-# - Integrate with metadata
-# - Perform tissue-specific statistical analysis
-# - Generate comprehensive visualizations
 ```
 
 ### Example 4: LRR-RLK Specialized Analysis
@@ -423,12 +408,6 @@ Rscript tissue_specific_sa_analysis.R config.yaml tissue_results/
 ```bash
 # Analyze LRR-RLK patterns
 Rscript lrr_rlk_analysis.R
-
-# This will:
-# - Identify LRR-RLK genes using pattern matching
-# - Perform subfamily classification
-# - Create interaction networks
-# - Generate specialized visualizations
 ```
 
 ### Example 5: Metadata Management
@@ -452,14 +431,10 @@ python search_crr_samples.py \
 ```
 results/
 ├── figures/
-│   ├── distributions/          # Correlation distribution plots
-│   │   └── correlation_distributions.png
-│   ├── comparisons/            # Tissue comparison plots  
-│   │   ├── tissue_violin_plots.png
-│   │   └── correlation_directions.png
-│   ├── heatmaps/              # Expression heatmaps
-│   │   └── gene_tissue_heatmap.png
-│   └── networks/              # Interaction networks
+│   ├── correlation_distributions.png
+│   ├── tissue_violin_plots.png
+│   ├── gene_tissue_heatmap.png
+│   └── correlation_networks.png
 ├── tables/
 │   ├── integrated_correlation_data.csv
 │   ├── tissue_summary_statistics.csv
@@ -486,13 +461,13 @@ LRR_RLK_analysis/
    - Columns: Gene, NAT, Correlation, P-value, N_Cells, Sample, Tissue
 
 2. **tissue_summary_statistics.csv**: Tissue-level statistics
-   - Mean correlations, sample counts, significance ratios, direction analysis
+   - Mean correlations, sample counts, significance ratios
 
 3. **gene_tissue_statistics.csv**: Gene-level tissue-specific analysis
    - Mean correlations per gene per tissue, consistency metrics
 
 4. **lrr_rlk_network_metrics.csv**: Network analysis results
-   - Degree, betweenness, closeness, eigenvector centrality, community membership
+   - Degree, betweenness, closeness, eigenvector centrality
 
 5. **LRR_RLK_Analysis_Report.txt**: Comprehensive LRR-RLK analysis report
    - Executive summary, key findings, statistical comparisons
@@ -515,7 +490,7 @@ performance:
 #### Missing Packages
 ```bash
 # Check and install missing R packages
-Rscript -e "source('R/install_packages.R')"
+Rscript install_packages.R
 
 # For Python packages
 conda install package_name
@@ -566,11 +541,11 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 ### Development Setup
 
 ```bash
-# Clone with submodules
-git clone --recursive https://github.com/yourusername/AThNATCount.git
+# Clone the repository
+git clone https://github.com/yourusername/AThNATCount.git
 
 # Install development dependencies
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 ```
 
 ## Citation
@@ -578,7 +553,7 @@ pip install -r requirements-dev.txt
 If you use AThNATCount in your research, please cite:
 
 ```
-AThNATCount: A Comprehensive Pipeline for Arabidopsis thaliana Natural Antisense Transcript Analysis
+AThNATCount: A Pipeline for Arabidopsis thaliana Natural Antisense Transcript Analysis
 [Your Name et al.]
 [Journal/Conference]
 [Year]
