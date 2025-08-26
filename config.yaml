@@ -1,0 +1,80 @@
+# AThNATCount Configuration File
+# Central configuration for all analysis parameters
+
+# Project settings
+project:
+  name: "AThNATCount"
+  description: "Arabidopsis thaliana Natural Antisense Transcript Analysis"
+  output_dir: "./results"
+  temp_dir: "./temp"
+  log_dir: "./logs"
+  
+# Reference files
+reference:
+  gtf_file: "./Ref/Araport11_genes.gtf"
+  lncrna_gff: "./Ref/A.tha.lncRNA.gff"
+  lrr_rlk_ids: "./Ref/AtLRR_RLK_ids.txt"
+  genome_fasta: "./Ref/Araport11_genome.fasta"  # Optional
+  
+# Input data paths
+input:
+  cellranger_dir: "./Cellranger_Results"
+  metadata_file: "./01_Data/Processed_Data/Integrated_metadata_final.csv"
+  sa_results_dir: "./test_results/batch_analysis"
+  
+# Analysis parameters
+analysis:
+  # Sense-antisense correlation parameters
+  correlation:
+    min_shared_cells: 3
+    min_expression: 0
+    correlation_method: "pearson"  # pearson, spearman, kendall
+    
+  # Tissue-specific analysis
+  tissue:
+    consolidate_tissues: true
+    tissue_mapping:
+      - pattern: "root"
+        category: "Root"
+      - pattern: "leaf|leaves"
+        category: "Leaf"
+      - pattern: "seed"
+        category: "Seed"
+      - pattern: "flower"
+        category: "Flower"
+        
+  # LRR-RLK analysis
+  lrr_rlk:
+    patterns: ["LRR", "RLK", "RECEPTOR", "KINASE", "CLV", "FLS", "BAK", "BRI", "SERK"]
+    min_correlation: 0.3
+    pvalue_threshold: 0.05
+    
+# Performance settings
+performance:
+  parallel_cores: 0  # 0 = auto-detect
+  chunk_size: 1000
+  memory_limit: "80GB"
+  
+# Output settings
+output:
+  formats: ["csv", "xlsx", "json"]  # Output formats
+  figures:
+    dpi: 300
+    format: "png"
+    width: 10
+    height: 8
+    theme: "publication"  # publication, minimal, classic
+    
+# NCBI/SRA settings
+ncbi:
+  email: ""  # Required for NCBI E-utilities
+  api_key: ""  # Optional, increases rate limit
+  retry_attempts: 3
+  delay_seconds: 1
+  
+# Logging settings
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_logging: true
+  console_logging: true
